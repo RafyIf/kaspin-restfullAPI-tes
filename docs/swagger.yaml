@@ -1,0 +1,207 @@
+swagger: '2.0'
+info:
+  title: Kasir Pintar API TES Documentation
+basePath: /api
+schemes: [http, https]
+
+tags:
+  - name: Auth
+    description: Endpoints for auth resource
+  - name: Provinsi
+    description: Endpoints for provinsi resource
+  - name: Kota
+    description: Endpoints for kota resource
+
+definitions:
+  PaginationResponse:
+    type: object
+    properties:
+      total_items:
+        type: integer
+        description: number of total items
+      total_page:
+        type: integer
+        description: number of total page
+      current_page:
+        type: integer
+        description: number of current page response
+
+  ProvinsiModel:
+    type: object
+    properties:
+      id:
+        type: string
+      nama:
+        type: string
+
+  KotaModel:
+    type: object
+    properties:
+      id:
+        type: string
+      provinsi_id:
+        type: string
+      nama:
+        type: string
+
+securityDefinitions:
+  authAction:
+    type: apiKey
+    in: header
+    name: x-access-token
+
+paths:
+  /auth/sign-in:
+    post:
+      tags: [Auth]
+      summary: signIn user
+      produce:
+        - application/json
+      parameters:
+        - in: body
+          name: Bank
+          schema:
+            type: object
+            required:
+             - email
+             - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          type: object
+          description: signIn response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              data:
+                type: object
+                properties:
+                  email:
+                    type: string
+                  token:
+                    type: string
+  /provinsi:
+    get:
+      tags: [Provinsi]
+      summary: provinsi list data
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: q
+          type: string
+        - in: query
+          name: limit
+          type: integer
+        - in: query
+          name: page
+          type: integer
+      security:
+        - authAction: []
+      responses:
+        '200':
+          type: object
+          description: provinsi list data response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              data:
+                allOf:
+                  - $ref: '#/definitions/PaginationResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/definitions/ProvinsiModel'
+  /provinsi/{id}:
+    get:
+      tags: [Provinsi]
+      summary: find provinsi
+      security:
+        - authAction: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        '200':
+          type: object
+          description: provinsi response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              data:
+                $ref: '#/definitions/ProvinsiModel'
+  /kota:
+    get:
+      description: Get All kota
+      tags: [Kota]
+      security:
+        - authAction: []
+      produce:
+        - application/json
+      parameters:
+        - in: query
+          name: limit
+          type: integer
+          description: the number of items to return.
+        - in: query
+          name: q
+          type: string
+          description: search query.
+        - in: query
+          name: page
+          type: integer
+          description: which page of data will be returned
+      responses:
+        "200":
+          type: object
+          description: kota list data response
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              data:
+                allOf:
+                  - $ref: '#/definitions/PaginationResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/definitions/KotaModel'
+  /kota/{id}:
+    get:
+      description: Get kota By Id
+      tags: [Kota]
+      security:
+        - authAction: []
+      produce:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          required: true
+          type: integer
+      responses:
+        "200":
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              data:
+                $ref: '#/definitions/KotaModel'
